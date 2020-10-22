@@ -4,12 +4,11 @@ RUN apt update
 RUN apt install curl -y 
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sh -s -- -b /usr/local/bin
 
-RUN mkdir -p /app
-WORKDIR /app
-
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
+RUN mkdir -p /app
+WORKDIR /app
 COPY . .
 
 COPY ./entrypoint.sh /
