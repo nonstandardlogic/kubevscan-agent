@@ -1,7 +1,6 @@
 PROJECT_NAME 	:= kubescan-agent
 
-# ==============================================================================
-# Building containers
+# Containers
 
 FILES := $(shell docker ps -aq)
 
