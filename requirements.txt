@@ -7,6 +7,7 @@ kubernetes==12.0.0
 oauthlib==3.1.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
+python-crontab==2.5.1
 python-dateutil==2.8.1
 PyYAML==5.3.1
 requests==2.24.0
