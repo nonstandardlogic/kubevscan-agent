@@ -1,57 +1,81 @@
 
-#/usr/bin/python3
+# /usr/bin/python3
 
 import os
+import sys
 import hashlib
 import time
+
+from timeloop import Timeloop
+from datetime import timedelta
+
 import kubernetes.config
 import kubernetes.client
-from crontab import CronTab
+from os import path
+
+
+imgListNames = []
+tl = Timeloop()
+
 
 def hash(str_to_hash):
     hash_object = hashlib.sha256(str(str_to_hash).encode('utf-8'))
     hex_dig = hash_object.hexdigest()
     return hex_dig
 
+
 def getContainerImageListnames():
-    containerNames = [] 
+    containerNames = []
 
     # Local
-    #kubernetes.config.load_kube_config()
+    kubernetes.config.load_kube_config()
 
     # Inside the cluster
-    kubernetes.config.load_incluster_config()
+    # kubernetes.config.load_incluster_config()
 
-    node_name = os.environ.get('MY_NODE_NAME', None)
-    v1 = kubernetes.client.CoreV1Api()    
-    print("Listing containers for pods on node: ", node_name)
-    field_selector = "spec.nodeName=" + node_name
-    ret = v1.list_pod_for_all_namespaces(watch=False, field_selector=field_selector)
+    try:
+        os.environ["MY_POD_NAME"]
+    except KeyError:
+        print("Please set the environment variable MY_POD_NAME")
+        sys.exit(1)
+
+    pod_name = os.environ.get('MY_POD_NAME')
+    v1 = kubernetes.client.CoreV1Api()
+    print(f'Listing containers for pod : {pod_name}')
+    fs = "metadata.name=" + pod_name
+    ret = v1.list_pod_for_all_namespaces(watch=False, field_selector=fs)
     for i in ret.items:
         for j in i.spec.containers:
             containerNames.append(j.image)
+            print(f'Img {j.image} pod {i.metadata.name}')
 
     return containerNames
 
 
-def scanContainerImage(imageName):
-    os.system("trivy image -f json  " + imageName + " > " + hash(imageName) + ".json")
+@tl.job(interval=timedelta(seconds=30))
+def scheduled_job():
+    global imgListNames
+    print(f'Ctime : {format(time.ctime())} Img count : {len(imgListNames)}')
+    for i in imgListNames:
+        print("Scanning %s\t" % (i))
+        scanContainerImage(i)
+
+
+def scanContainerImage(i):
+    h = hash(i)
+    os.system("trivy image -f json " + i + " > " + "./logs/" + h + ".json")
 
 
 def main():
-    cron = CronTab(user=True)
-    names = getContainerImageListnames()
-    for i in names:
-        print("%s\t" % (i))
-        # scanContainerImage(i)
-        job = cron.new(command="trivy image -f json  " + i + " > " + hash(i) + ".json")
-        job.minute.every(10)
-        cron.write()
-    
-    while True:
-        time.sleep(5)  
+    global imgListNames
+    imgListNames = getContainerImageListnames()
+
+    logPath = "./logs"
+    if (path.isdir(logPath) is False):
+        os.mkdir(logPath)
+
+    tl.start(block=True)
 
 
 if __name__ == '__main__':
     main()
-

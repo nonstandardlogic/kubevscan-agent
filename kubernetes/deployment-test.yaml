@@ -7,11 +7,11 @@ spec:
     - name: kubescan-agent
       image: nonstandardlogic/kubescan-agent
       env:
-        - name: MY_NODE_NAME
+        - name: K8S_NODE_NAME
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-        - name: MY_POD_NAME
+        - name: K8S_POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
