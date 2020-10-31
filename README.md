@@ -31,7 +31,9 @@ Deploy the pod which contains kubevscan-agent
     $ kubectl apply -f kubernetes/deployment-test.yaml
 
 
-
+Kubevscan creates a log file for each image. 
+The name of the log file is produced by the hash code of the image name. 
+The log files are stored in the */var/log/kubevscan* directory
 
 
 

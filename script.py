@@ -63,14 +63,14 @@ def scheduled_job():
 
 def scanContainerImage(i):
     h = hash(i)
-    os.system("trivy image -f json " + i + " > " + "./logs/" + h + ".json")
+    os.system("trivy image -f json " + i + " > " + "/var/log/kubevscan/" + h + ".json")
 
 
 def main():
     global imgListNames
     imgListNames = getContainerImageListnames()
 
-    logPath = "./logs"
+    logPath = "/var/log/kubevscan"
     if (path.isdir(logPath) is False):
         os.mkdir(logPath)
 
