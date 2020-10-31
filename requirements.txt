@@ -16,3 +16,4 @@ rsa==4.6
 six==1.15.0
 urllib3==1.25.11
 websocket-client==0.57.0
+timeloop==1.0.2

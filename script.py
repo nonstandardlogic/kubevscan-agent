@@ -28,10 +28,10 @@ def getContainerImageListnames():
     containerNames = []
 
     # Local
-    kubernetes.config.load_kube_config()
+    # kubernetes.config.load_kube_config()
 
     # Inside the cluster
-    # kubernetes.config.load_incluster_config()
+    kubernetes.config.load_incluster_config()
 
     try:
         os.environ["MY_POD_NAME"]
